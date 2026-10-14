@@ -3,4 +3,4 @@ from django.db import models
 #create your models here.
 
 class User(AbstractUser):
-    pass
+    email = models.EmailField(unique=True)
