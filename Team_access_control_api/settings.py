@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     'health',
     'accounts', # this app is to manage the user accounts and authentication
     'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 MIDDLEWARE = [
@@ -158,4 +159,6 @@ REST_FRAMEWORK = {
 SIMPLE_JWT = {
     "ACCESS_TOKEN_LIFETIME":timedelta(minutes=15),
     "REFRESH_TOKEN_LIFETIME":timedelta(days=1),
+    "ROTATE_REFRESH_TOKENS":True,
+    "BLACKLIST_AFTER_ROTATION":True,
 }
