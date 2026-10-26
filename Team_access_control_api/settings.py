@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'djoser',
     'health',
     'accounts', # this app is to manage the user accounts and authentication
+    'organizations',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
 ]
