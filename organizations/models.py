@@ -12,10 +12,12 @@ class OrganizationMembership(models.Model):
     ROLE_ADMIN = 'A'
     ROLE_OWNER='O'
     ROLE_MEMBER = 'M'
+    ROLE_VIEWER = 'V'
     MEMBERSHIP_CHOICES = [
         (ROLE_ADMIN,'admin'),
         (ROLE_OWNER,'owner'),
         (ROLE_MEMBER,'member'),
+        (ROLE_VIEWER,'viewer')
     ]
     id = models.UUIDField(primary_key=True,default=uuid4,editable=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, related_name='organization_memberships')

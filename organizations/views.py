@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from .models import Organization, OrganizationMembership
 from .serializers import OrganizationSerializer,MembershipSerializer
 
+from .permissions import HasOrganizationPermission
+
 # Create your views here.
 class OrganizationListCreateView(APIView):
 
@@ -59,8 +61,9 @@ class OrganizationDetailView(APIView):
         return Response(serializer.data,status=status.HTTP_200_OK)
 
 class OrganizationMembers(APIView):
-    permission_classes = [IsAuthenticated]
-
+    permission_classes = [IsAuthenticated,HasOrganizationPermission]
+    required_permission = "users.read"
+    
     def get(self,request,org_id):
         organization = get_object_or_404(Organization,id=org_id)
         memberships = OrganizationMembership.objects.filter(
@@ -71,7 +74,8 @@ class OrganizationMembers(APIView):
 
 
 class OrganizationMemberdetailView(APIView):
-    permissions_classes = [IsAuthenticated]
+    permissions_classes = [IsAuthenticated,HasOrganizationPermission]
+    required_permissions = "users.update"
     def patch(self,request,org_id,user_id):
         organization = get_object_or_404(
             Organization,
