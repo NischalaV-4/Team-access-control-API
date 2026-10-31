@@ -7,8 +7,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 
-from .models import Organization, OrganizationMembership
-from .serializers import OrganizationSerializer,MembershipSerializer
+from .models import Organization, OrganizationMembership,Team
+from .serializers import OrganizationSerializer,MembershipSerializer,TeamSerializer
 
 from .permissions import HasOrganizationPermission
 
@@ -74,8 +74,8 @@ class OrganizationMembers(APIView):
 
 
 class OrganizationMemberdetailView(APIView):
-    permissions_classes = [IsAuthenticated,HasOrganizationPermission]
-    required_permissions = "users.update"
+    permission_classes = [IsAuthenticated,HasOrganizationPermission]
+    required_permission = "users.update"
     def patch(self,request,org_id,user_id):
         organization = get_object_or_404(
             Organization,
@@ -111,3 +111,70 @@ class OrganizationMemberdetailView(APIView):
 
 
 
+class OrganizationTeamListCreateView(APIView):
+    permission_classes = [IsAuthenticated,HasOrganizationPermission,]
+    required_permission = {
+        "GET": "teams.read",
+        "POST": "teams.write",
+    }
+    def get(self, request, org_id):
+        organization = get_object_or_404(Organization,pk=org_id)
+        teams = Team.objects.filter(organization=organization).order_by("created_at")
+        serializer = TeamSerializer(
+            teams,
+            many=True,
+            context={"request": request,"organization": organization,},
+        )
+        return Response(serializer.data,status=status.HTTP_200_OK,)
+
+    def post(self, request, org_id):
+        organization = get_object_or_404(Organization,pk=org_id)
+
+        serializer = TeamSerializer(
+            data=request.data,
+            context={"request": request,"organization": organization},
+        )
+
+        serializer.is_valid(raise_exception=True)
+
+        team = serializer.save(organization=organization)
+
+        return Response(TeamSerializer(
+                team,
+                context={"request": request,"organization": organization},
+            ).data,status=status.HTTP_201_CREATED)
+    
+
+class TeamDetailView(APIView):
+    permission_classes = [IsAuthenticated,HasOrganizationPermission,]
+    required_permission = {
+        "GET": "teams.read",
+        "PATCH": "teams.write",
+        "DELETE": "teams.write",
+    }
+
+    def get(self, request, team_id):
+        team = get_object_or_404(Team,pk=team_id,)
+
+        serializer = TeamSerializer(
+            team,
+            context={"request": request,"organization": team.organization,},
+        )
+
+        return Response(serializer.data,status=status.HTTP_200_OK,)
+
+    def patch(self, request, team_id):
+        team = get_object_or_404(Team,pk=team_id)
+
+        serializer = TeamSerializer(team,data=request.data,partial=True,
+            context={"request": request,"organization": team.organization,
+            }
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data,status=status.HTTP_200_OK)
+
+    def delete(self, request, team_id):
+        team = get_object_or_404(Team,pk=team_id)
+        team.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
